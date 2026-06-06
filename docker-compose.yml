@@ -1,0 +1,26 @@
+version: '3.9'
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+      - ./mlruns:/app/mlruns
+      - ./data:/app/data
+      - ./reports:/app/reports
+      - ./tableau:/app/tableau
+    ports:
+      - 8000:8000
+    environment:
+      - DATABASE_URL=sqlite:///./fraud_detection.db
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    depends_on:
+      - mlflow
+
+  mlflow:
+    build: .
+    ports:
+      - 5000:5000
+    volumes:
+      - ./mlruns:/app/mlruns
+      - ./data:/app/data
+    command: mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root /app/mlruns --host 0.0.0.0 --port 5000
